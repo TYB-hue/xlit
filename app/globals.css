@@ -1,0 +1,189 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* background: rgba(215, 242, 79); */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
+  background-color: #1a1a1a;
+}
+
+body {
+  background-color: #1a1a1a;
+  color: #f4f4f2;
+  font-feature-settings: 'ss01' on, 'cv01' on;
+}
+
+.font-display {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.font-brand {
+  font-family: Arial Black, Arial, Helvetica, sans-serif;
+}
+
+.hero-cta {
+  display: inline-flex;
+  isolation: isolate;
+  overflow: hidden;
+  line-height: 1.2;
+  position: relative;
+  transition: transform 300ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  z-index: 0;
+}
+
+.hero-cta .text-container {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.hero-cta .text {
+  display: block;
+}
+
+.hero-cta:hover .text,
+.hero-cta:focus-visible .text {
+  animation: hero-cta-text 300ms forwards;
+}
+
+.hero-cta::before,
+.hero-cta::after {
+  background: rgb(255 255 255);
+  content: '';
+  display: block;
+  height: 102%;
+  left: -60%;
+  pointer-events: none;
+  position: absolute;
+  top: -104%;
+  transform: skew(30deg) translateY(var(--progress, 0));
+  transition: transform 200ms ease;
+  width: 100%;
+}
+
+.hero-cta::after {
+  --progress: 0%;
+  left: 60%;
+  top: 102%;
+}
+
+.hero-cta--lime-sweep::before,
+.hero-cta--lime-sweep::after {
+  background: rgba(215, 242, 79);
+}
+
+/* The white sweep on this outlined CTA needs dark text for readable contrast. */
+.hero-cta--add-to-cart:hover .text,
+.hero-cta--add-to-cart:focus-visible .text {
+  color: #0a0a0c;
+}
+
+.hero-cta:hover::before,
+.hero-cta:focus-visible::before {
+  --progress: 100%;
+}
+
+.hero-cta:hover::after,
+.hero-cta:focus-visible::after {
+  --progress: -102%;
+}
+
+@keyframes hero-cta-text {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(80%);
+  }
+  51% {
+    transform: translateY(-80%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes review-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.review-track {
+  animation: review-scroll 45s linear infinite;
+}
+
+.review-track > article {
+  margin-right: 1.25rem;
+}
+
+.review-marquee:hover .review-track {
+  animation-play-state: paused;
+}
+
+/* Comforting = generous, slow, low-effort easing everywhere. No snap, no bounce. */
+* {
+  transition-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+::selection {
+  background: #d7f24e;
+  color: #0a0a0c;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .hero-cta,
+  .hero-cta .text {
+    transition-duration: 0.01ms !important;
+  }
+
+  .hero-cta:hover .text,
+  .hero-cta:focus-visible .text {
+    animation: none;
+  }
+}
+
+/* soft focus ring, kept visible for accessibility but toned to match the palette */
+:focus-visible {
+  outline: 2px solid #d7f24e;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.dashed-link {
+  stroke: #3a3b40;
+  stroke-width: 1.5;
+  stroke-dasharray: 4 5;
+  fill: none;
+}
+
+@keyframes cart-drawer-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@media (min-width: 640px) {
+  .cart-drawer-panel { animation: cart-drawer-in 360ms cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+}
+
+@media (max-width: 639px) {
+  @keyframes cart-drawer-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .cart-drawer-panel { animation: cart-drawer-up 360ms cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+}
