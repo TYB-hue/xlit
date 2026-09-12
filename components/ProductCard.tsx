@@ -2,15 +2,15 @@ import type { Product } from '../data/products';
 
 export default function ProductCard({ product, index }: { product: Product; index: number }) {
   return (
-    <article className="group relative flex min-w-0 flex-col overflow-hidden rounded-2xl border border-[#2b2b2b] bg-[#0F0F0F] p-4 sm:p-5">
-      <div className="w-full overflow-hidden rounded-xl bg-[#0F0F0F]">
+    <article className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-[#2b2b2b] bg-[#0F0F0F] p-4 sm:p-5">
+      <div className="flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-xl bg-[#0F0F0F]">
         <img
           src={`/products/${product.images[0]}`}
           alt={`XLIT ${product.name} ${index + 1}`}
           className="block h-auto w-full object-contain"
         />
       </div>
-      <div className="mt-4 flex items-end justify-between gap-3">
+      <div className="mt-4 flex flex-1 items-end justify-between gap-3">
         <div>
           <h2 className="text-base font-medium text-ink sm:text-lg">{product.name}</h2>
           <p className="mt-1 text-sm text-inkdim sm:text-base">{product.price}</p>
