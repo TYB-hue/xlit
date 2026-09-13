@@ -1,4 +1,5 @@
 import Reveal from './Reveal';
+import HeroVideo from './HeroVideo';
 
 export default function Hero() {
   return (
@@ -6,16 +7,7 @@ export default function Hero() {
       id="top"
       className="isolate relative flex min-h-[calc(100svh-88px)] items-center justify-center overflow-hidden px-6 py-24 lg:px-10"
     >
-      <video
-        className="absolute inset-0 -z-20 h-full w-full object-cover "
-        autoPlay
-        loop
-        muted
-        playsInline
-        aria-hidden="true"
-      >
-        <source src="/videos/bg.mp4" type="video/mp4" />
-      </video>
+      <HeroVideo />
 
       <div
         className="absolute inset-0 -z-10 bg-gradient-to-r from-bg/80 via-bg/60 to-bg/20"
