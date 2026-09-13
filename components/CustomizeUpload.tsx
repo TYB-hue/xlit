@@ -4,7 +4,9 @@ import { ChangeEvent, DragEvent, FormEvent, useRef, useState } from 'react';
 import Reveal from './Reveal';
 
 const MAX_FILES = 3;
-const MAX_FILE_SIZE = 30 * 1024 * 1024;
+const MAX_TOTAL_FILE_SIZE = 10 * 1024 * 1024;
+const FORMSUBMIT_EMAIL =
+  process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL ?? 'ahmed.pruo@gmail.com';
 
 type StoredFile = {
   id: string;
@@ -39,6 +41,8 @@ export default function CustomizeUpload() {
   const addFiles = (incomingFiles: File[]) => {
     const availableSlots = MAX_FILES - files.length;
     const errors: string[] = [];
+    let remainingBytes =
+      MAX_TOTAL_FILE_SIZE - files.reduce((total, storedFile) => total + storedFile.file.size, 0);
 
     if (availableSlots <= 0) {
       setMessage('You can upload a maximum of 3 files. Remove a file before adding another.');
@@ -55,11 +59,12 @@ export default function CustomizeUpload() {
         errors.push(`${file.name} is not an image or PDF.`);
         continue;
       }
-      if (file.size > MAX_FILE_SIZE) {
-        errors.push(`${file.name} could not upload because it is larger than 30 MB.`);
+      if (file.size > remainingBytes) {
+        errors.push(`${file.name} could not upload because files together must stay under 10 MB.`);
         continue;
       }
       acceptedFiles.push(file);
+      remainingBytes -= file.size;
     }
 
     if (acceptedFiles.length) {
@@ -106,22 +111,38 @@ export default function CustomizeUpload() {
     }
 
     const requestData = new FormData();
-    requestData.append('name', name);
-    requestData.append('email', email);
-    requestData.append('phone', phone);
-    requestData.append('description', description);
-    files.forEach(({ file }) => requestData.append('files', file));
+    requestData.append('_subject', `New XLIT customization request from ${name}`);
+    requestData.append('_template', 'table');
+    requestData.append('_captcha', 'false');
+    if (email) requestData.append('_replyto', email);
+    requestData.append('Name', name);
+    requestData.append('Email', email || 'Not provided');
+    requestData.append('Phone', phone || 'Not provided');
+    requestData.append('message', description || 'Not provided');
+    requestData.append('Description', description || 'Not provided');
+    requestData.append('Files', files.map(({ file }) => file.name).join(', '));
+    files.forEach(({ file }, index) => {
+      const fieldName = index === 0 ? 'attachment' : `attachment${index + 1}`;
+      requestData.append(fieldName, file, file.name);
+    });
 
     setIsSubmitting(true);
     setFormMessage('');
     try {
-      const response = await fetch('/api/customize', {
-        method: 'POST',
-        body: requestData,
-      });
+      const response = await fetch(
+        `https://formsubmit.co/ajax/${encodeURIComponent(FORMSUBMIT_EMAIL)}`,
+        {
+          method: 'POST',
+          body: requestData,
+          headers: { Accept: 'application/json' },
+        },
+      );
       const result = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        setFormMessage(result.error ?? 'The form could not be submitted. Please try again.');
+      const submitted = result.success === true || result.success === 'true';
+      if (!response.ok || !submitted) {
+        setFormMessage(
+          result.message ?? result.error ?? 'The form could not be submitted. Please try again.',
+        );
         return;
       }
 
@@ -171,7 +192,7 @@ export default function CustomizeUpload() {
           Upload your references.
         </h2>
         <p className="mt-5 max-w-2xl text-base leading-relaxed text-inkdim sm:text-lg">
-          Add up to three images or PDFs, each no larger than 30 MB. Your files are stored here until you submit.
+          Add up to three images or PDFs. FormSubmit allows 10 MB total across all files. Your files stay here until you submit.
         </p>
       </Reveal>
 
@@ -223,7 +244,7 @@ export default function CustomizeUpload() {
           <span className="text-lime">Click to upload</span>
           <span className="text-inkdim"> or drag and drop</span>
         </p>
-        <p className="mt-2 text-sm text-inkdim">PNG, JPG or PDF (max. 30 MB)</p>
+        <p className="mt-2 text-sm text-inkdim">PNG, JPG or PDF (max. 10 MB total)</p>
       </div>
       </Reveal>
 
