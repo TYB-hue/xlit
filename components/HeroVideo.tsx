@@ -43,7 +43,6 @@ export default function HeroVideo() {
       autoPlay
       loop
       muted
-      defaultMuted
       playsInline
       preload="metadata"
       poster="/products/texturebg.jpg"
