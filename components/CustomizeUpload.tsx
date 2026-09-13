@@ -119,13 +119,15 @@ export default function CustomizeUpload() {
         method: 'POST',
         body: requestData,
       });
-      const result = await response.json();
+      const result = await response.json().catch(() => ({}));
       if (!response.ok) {
         setFormMessage(result.error ?? 'The form could not be submitted. Please try again.');
         return;
       }
 
       setSubmission({ name, email, phone, description, files });
+      setFiles([]);
+      setMessage('');
       setFormMessage('Your form has been submitted successfully.');
       form.reset();
     } catch {
@@ -169,7 +171,7 @@ export default function CustomizeUpload() {
           Upload your references.
         </h2>
         <p className="mt-5 max-w-2xl text-base leading-relaxed text-inkdim sm:text-lg">
-          Add up to three images or PDFs, each no larger than 30 MB. Your files are stored here until you tell us what to do next.
+          Add up to three images or PDFs, each no larger than 30 MB. Your files are stored here until you submit.
         </p>
       </Reveal>
 

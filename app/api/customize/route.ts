@@ -3,7 +3,7 @@ import { Resend } from 'resend';
 
 const MAX_FILES = 3;
 const MAX_FILE_SIZE = 30 * 1024 * 1024;
-const RECIPIENT = 'frank.wilson.incall@gmail.com';
+const DEFAULT_RECIPIENTS = ['frank.wilson.incall@gmail.com', 'ahmed.pruo@gmail.com'];
 
 const escapeHtml = (value: string) =>
   value.replace(/[&<>'"]/g, (character) => ({
@@ -48,10 +48,17 @@ export async function POST(request: Request) {
       })),
     );
 
+    const recipients = (process.env.RESEND_TO_EMAIL ?? DEFAULT_RECIPIENTS.join(','))
+      .split(',')
+      .map((address) => address.trim())
+      .filter((address) => address.includes('@'));
+    if (!recipients.length) {
+      return NextResponse.json({ error: 'Email delivery is not configured.' }, { status: 503 });
+    }
+
     const resend = new Resend(apiKey);
-    const { error } = await resend.emails.send({
+    const payload = {
       from: process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev',
-      to: RECIPIENT,
       replyTo: email || undefined,
       subject: `New XLIT customization request from ${name}`,
       text: [
@@ -71,13 +78,27 @@ export async function POST(request: Request) {
         <p><strong>Files:</strong> ${files.map((file) => escapeHtml(file.name)).join(', ')}</p>
       `,
       attachments,
-    });
+    };
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 502 });
+    const results = await Promise.all(
+      recipients.map(async (to) => {
+        const { error } = await resend.emails.send({ ...payload, to });
+        return { to, error: error?.message ?? null };
+      }),
+    );
+    const delivered = results.filter((result) => !result.error);
+    if (!delivered.length) {
+      return NextResponse.json(
+        { error: results.map((result) => `${result.to}: ${result.error}`).join(' ') },
+        { status: 502 },
+      );
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      delivered: delivered.map((result) => result.to),
+      failed: results.filter((result) => result.error),
+    });
   } catch {
     return NextResponse.json({ error: 'The request could not be submitted. Please try again.' }, { status: 500 });
   }

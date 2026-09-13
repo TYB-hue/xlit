@@ -25,11 +25,8 @@ export default function Hero() {
       <Reveal className="relative z-10 mx-auto w-full max-w-7xl">
       <div className="flex flex-col items-start text-left text-white">
         <h1 className="font-display max-w-3xl text-4xl font-light leading-[1.02] tracking-[-0.045em] drop-shadow-2xl sm:text-5xl lg:text-6xl">
-     From the Nano to the world
+          From the Nano to the world
         </h1>
-        
-   
-        
         
         <p className="mt-8 max-w-2xl text-base font-light leading-relaxed text-white/85 sm:text-lg lg:text-xl">
           Born from the unknown and inspired by Jahseh Dwayne, XLIT is made for
