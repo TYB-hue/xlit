@@ -2,8 +2,10 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
 const MAX_FILES = 3;
-const MAX_FILE_SIZE = 30 * 1024 * 1024;
-const DEFAULT_RECIPIENTS = ['frank.wilson.incall@gmail.com', 'ahmed.pruo@gmail.com'];
+const MAX_TOTAL_FILE_SIZE = 10 * 1024 * 1024;
+const DEFAULT_RECIPIENTS = ['frank.wilson.incall@gmail.com'];
+
+export const runtime = 'nodejs';
 
 const escapeHtml = (value: string) =>
   value.replace(/[&<>'"]/g, (character) => ({
@@ -19,7 +21,8 @@ const isAcceptedFile = (file: File) =>
 
 export async function POST(request: Request) {
   const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
+  const from = process.env.RESEND_FROM_EMAIL;
+  if (!apiKey || !from) {
     return NextResponse.json({ error: 'Email delivery is not configured.' }, { status: 503 });
   }
 
@@ -37,8 +40,11 @@ export async function POST(request: Request) {
     if (!files.length || files.length > MAX_FILES) {
       return NextResponse.json({ error: 'Attach between 1 and 3 files.' }, { status: 400 });
     }
-    if (files.some((file) => !isAcceptedFile(file) || file.size > MAX_FILE_SIZE)) {
-      return NextResponse.json({ error: 'Attachments must be images or PDFs no larger than 30 MB.' }, { status: 400 });
+    if (files.some((file) => !isAcceptedFile(file))) {
+      return NextResponse.json({ error: 'Attachments must be images or PDFs.' }, { status: 400 });
+    }
+    if (files.reduce((total, file) => total + file.size, 0) > MAX_TOTAL_FILE_SIZE) {
+      return NextResponse.json({ error: 'Attachments must be 10 MB or less in total.' }, { status: 400 });
     }
 
     const attachments = await Promise.all(
@@ -58,7 +64,7 @@ export async function POST(request: Request) {
 
     const resend = new Resend(apiKey);
     const payload = {
-      from: process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev',
+      from,
       replyTo: email || undefined,
       subject: `New XLIT customization request from ${name}`,
       text: [
@@ -80,24 +86,15 @@ export async function POST(request: Request) {
       attachments,
     };
 
-    const results = await Promise.all(
-      recipients.map(async (to) => {
-        const { error } = await resend.emails.send({ ...payload, to });
-        return { to, error: error?.message ?? null };
-      }),
-    );
-    const delivered = results.filter((result) => !result.error);
-    if (!delivered.length) {
-      return NextResponse.json(
-        { error: results.map((result) => `${result.to}: ${result.error}`).join(' ') },
-        { status: 502 },
-      );
+    const { data, error } = await resend.emails.send({ ...payload, to: recipients });
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 502 });
     }
 
     return NextResponse.json({
       success: true,
-      delivered: delivered.map((result) => result.to),
-      failed: results.filter((result) => result.error),
+      delivered: recipients,
+      id: data?.id,
     });
   } catch {
     return NextResponse.json({ error: 'The request could not be submitted. Please try again.' }, { status: 500 });

@@ -5,9 +5,6 @@ import Reveal from './Reveal';
 
 const MAX_FILES = 3;
 const MAX_TOTAL_FILE_SIZE = 10 * 1024 * 1024;
-const FORMSUBMIT_EMAIL =
-  process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL ?? 'ahmed.pruo@gmail.com';
-
 type StoredFile = {
   id: string;
   file: File;
@@ -111,32 +108,16 @@ export default function CustomizeUpload() {
     }
 
     const requestData = new FormData();
-    requestData.append('_subject', `New XLIT customization request from ${name}`);
-    requestData.append('_template', 'table');
-    requestData.append('_captcha', 'false');
-    if (email) requestData.append('_replyto', email);
-    requestData.append('Name', name);
-    requestData.append('Email', email || 'Not provided');
-    requestData.append('Phone', phone || 'Not provided');
-    requestData.append('message', description || 'Not provided');
-    requestData.append('Description', description || 'Not provided');
-    requestData.append('Files', files.map(({ file }) => file.name).join(', '));
-    files.forEach(({ file }, index) => {
-      const fieldName = index === 0 ? 'attachment' : `attachment${index + 1}`;
-      requestData.append(fieldName, file, file.name);
-    });
+    requestData.append('name', name);
+    requestData.append('email', email);
+    requestData.append('phone', phone);
+    requestData.append('description', description);
+    files.forEach(({ file }) => requestData.append('files', file, file.name));
 
     setIsSubmitting(true);
     setFormMessage('');
     try {
-      const response = await fetch(
-        `https://formsubmit.co/ajax/${encodeURIComponent(FORMSUBMIT_EMAIL)}`,
-        {
-          method: 'POST',
-          body: requestData,
-          headers: { Accept: 'application/json' },
-        },
-      );
+      const response = await fetch('/api/customize', { method: 'POST', body: requestData });
       const result = await response.json().catch(() => ({}));
       const submitted = result.success === true || result.success === 'true';
       if (!response.ok || !submitted) {
@@ -192,7 +173,7 @@ export default function CustomizeUpload() {
           Upload your references.
         </h2>
         <p className="mt-5 max-w-2xl text-base leading-relaxed text-inkdim sm:text-lg">
-          Add up to three images or PDFs. FormSubmit allows 10 MB total across all files. Your files stay here until you submit.
+          Add up to three images or PDFs, up to 10 MB in total. Your files stay here until you submit.
         </p>
       </Reveal>
 
