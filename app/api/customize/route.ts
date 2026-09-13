@@ -3,7 +3,7 @@ import { Resend } from 'resend';
 
 const MAX_FILES = 3;
 const MAX_TOTAL_FILE_SIZE = 10 * 1024 * 1024;
-const DEFAULT_RECIPIENTS = ['frank.wilson.incall@gmail.com'];
+const DEFAULT_RECIPIENT = 'frank.wilson.incall@gmail.com';
 
 export const runtime = 'nodejs';
 
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       })),
     );
 
-    const recipients = (process.env.RESEND_TO_EMAIL ?? DEFAULT_RECIPIENTS.join(','))
+    const recipients = (process.env.RESEND_TO_EMAIL ?? DEFAULT_RECIPIENT)
       .split(',')
       .map((address) => address.trim())
       .filter((address) => address.includes('@'));
@@ -65,6 +65,7 @@ export async function POST(request: Request) {
     const resend = new Resend(apiKey);
     const payload = {
       from,
+      to: recipients,
       replyTo: email || undefined,
       subject: `New XLIT customization request from ${name}`,
       text: [
@@ -86,7 +87,17 @@ export async function POST(request: Request) {
       attachments,
     };
 
-    const { data, error } = await resend.emails.send({ ...payload, to: recipients });
+    let data: { id: string } | null = null;
+    let error: { message: string } | null = null;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const result = await resend.emails.send(payload);
+      data = result.data;
+      error = result.error;
+      if (!error || !/could not be resolved|unable to fetch data/i.test(error.message)) {
+        break;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 400 * (attempt + 1)));
+    }
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 502 });
     }
