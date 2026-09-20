@@ -13,13 +13,16 @@ export function getSupabaseAdmin() {
 
 export async function requireAdmin(request: Request) {
   const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
-  const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const adminEmails = (process.env.ADMIN_EMAIL ?? '')
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
   const supabase = getSupabaseAdmin();
 
-  if (!token || !adminEmail || !supabase) return null;
+  if (!token || !adminEmails.length || !supabase) return null;
 
   const { data, error } = await supabase.auth.getUser(token);
-  if (error || data.user.email?.toLowerCase() !== adminEmail) return null;
+  if (error || !data.user.email || !adminEmails.includes(data.user.email.toLowerCase())) return null;
 
   return supabase;
 }
