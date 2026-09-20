@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { productImageSrc } from '../lib/product-image';
 
 type CartItem = {
   slug: string;
@@ -95,7 +96,7 @@ export default function CartDrawer({ isOpen, onOpenChange }: CartDrawerProps) {
                     {cart.map((item, index) => (
                       <article key={`${item.slug}-${item.color}-${item.size}`} className="grid grid-cols-[92px_minmax(0,1fr)] gap-5 py-6">
                         <div className="flex aspect-square items-center justify-center border border-stroke bg-[#0d0d0d] p-1">
-                          <img src={`/products/${item.image}`} alt={`XLIT ${item.name}`} className="h-full w-full object-contain" />
+                          <img src={productImageSrc(item.image)} alt={`XLIT ${item.name}`} className="h-full w-full object-contain" />
                         </div>
                         <div className="min-w-0">
                           <div className="flex justify-between gap-3">
@@ -119,7 +120,7 @@ export default function CartDrawer({ isOpen, onOpenChange }: CartDrawerProps) {
                   <div className="flex items-center justify-between text-sm text-inkdim"><span>Subtotal</span><span className="text-ink">{formatPrice(subtotal)}</span></div>
                   <p className="mt-2 text-xs text-inkdim">Delivery will be calculated at checkout.</p>
                   <div className="mt-5 flex items-center justify-between border-t border-stroke pt-5 text-xl font-medium text-ink"><span>Total</span><span>{formatPrice(subtotal)}</span></div>
-                  <button type="button" disabled className="mt-6 w-full bg-lime px-5 py-3.5 text-sm font-medium uppercase tracking-wide text-bg opacity-60">Checkout coming soon</button>
+                  <a href="/checkout?source=cart" onClick={() => onOpenChange(false)} className="mt-6 block w-full bg-lime px-5 py-3.5 text-center text-sm font-medium uppercase tracking-wide text-bg">Checkout</a>
                   <a href="/cart" onClick={() => onOpenChange(false)} className="mt-5 block text-center text-sm text-inkdim underline underline-offset-4 hover:text-lime">View full cart</a>
                 </footer>
               </>

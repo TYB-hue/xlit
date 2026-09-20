@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { productImageSrc } from '../lib/product-image';
 
 export default function ProductGallery({ images, name }: { images: string[]; name: string }) {
   const [activeImage, setActiveImage] = useState(0);
@@ -19,12 +20,12 @@ export default function ProductGallery({ images, name }: { images: string[]; nam
             aria-pressed={activeImage === index}
             className={`flex aspect-square w-full shrink-0 items-center justify-center overflow-hidden bg-[#0F0F0F] p-1 ${activeImage === index ? 'ring-1 ring-lime' : ''}`}
           >
-            <img src={`/products/${image}`} alt="" className="h-full w-full object-contain" />
+            <img src={productImageSrc(image)} alt="" className="h-full w-full object-contain" />
           </button>
         ))}
       </div>
       <div className="relative flex aspect-square min-w-0 items-center justify-center overflow-hidden bg-[#0F0F0F] p-3 sm:p-5">
-        <img src={`/products/${images[activeImage]}`} alt={`XLIT ${name}, photo ${activeImage + 1}`} className="h-full w-full object-contain" />
+        <img src={productImageSrc(images[activeImage])} alt={`XLIT ${name}, photo ${activeImage + 1}`} className="h-full w-full object-contain" />
         <div className="absolute bottom-3 right-3 flex flex-col gap-2 sm:bottom-5 sm:right-5">
           <button
             type="button"

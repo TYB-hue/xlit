@@ -2,10 +2,11 @@ import Footer from '../components/Footer';
 import Hero from '../components/Hero';
 import Nav from '../components/Nav';
 import ProductCard from '../components/ProductCard';
-import { products } from '../data/products';
+import { getProducts } from '../lib/catalog';
 
 
-export default function Home() {
+export default async function Home() {
+  const products = await getProducts();
   return (
     <>
       <Nav />

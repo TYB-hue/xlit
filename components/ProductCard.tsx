@@ -1,11 +1,12 @@
 import type { Product } from '../data/products';
+import { productImageSrc } from '../lib/product-image';
 
 export default function ProductCard({ product, index }: { product: Product; index: number }) {
   return (
     <article className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-[#2b2b2b] bg-[#0F0F0F] p-4 sm:p-5">
       <div className="flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-xl bg-[#0F0F0F]">
         <img
-          src={`/products/${product.images[0]}`}
+          src={productImageSrc(product.images[0])}
           alt={`XLIT ${product.name} ${index + 1}`}
           className="block h-auto w-full object-contain"
         />

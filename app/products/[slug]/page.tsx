@@ -4,17 +4,12 @@ import Nav from '../../../components/Nav';
 import ProductCard from '../../../components/ProductCard';
 import ProductGallery from '../../../components/ProductGallery';
 import ProductPurchasePanel from '../../../components/ProductPurchasePanel';
-import { products } from '../../../data/products';
+import ReviewForm from '../../../components/ReviewForm';
+import { getProductBySlug, getProducts } from '../../../lib/catalog';
 
-export function generateStaticParams() {
-  return products.map(({ slug }) => ({ slug }));
-}
-
-export default function ProductDetailPage({ params }: { params: { slug: string } }) {
-  const productIndex = products.findIndex(({ slug }) => slug === params.slug);
-  if (productIndex === -1) notFound();
-
-  const product = products[productIndex];
+export default async function ProductDetailPage({ params }: { params: { slug: string } }) {
+  const [product, products] = await Promise.all([getProductBySlug(params.slug), getProducts()]);
+  if (!product) notFound();
   const recommendations = products.filter(({ slug }) => slug !== product.slug);
   // Four identical cycles keep the marquee filled on wide screens; translating
   // half the track still lands on the same review sequence for a seamless loop.
@@ -40,12 +35,12 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
           </div>
         </section>
 
-        <section className="border-y border-stroke bg-[#141414] py-16 sm:py-20">
+        <section className="border-y border-stroke bg-[#141414] px-4 py-12 sm:px-6 sm:py-20">
           <h2 className="font-display text-center text-3xl font-light tracking-[-0.03em] text-ink sm:text-4xl">Customer reviews</h2>
           <div className="review-marquee mt-10 overflow-hidden">
             <div className="review-track flex w-max">
               {reviewTrack.map((review, index) => (
-                <article key={`${review.name}-${index}`} className="w-[290px] rounded-2xl border border-stroke bg-[#0F0F0F] p-6 sm:w-[360px]">
+                <article key={`${review.name}-${index}`} className="w-[calc(100vw-2rem)] max-w-[320px] rounded-2xl border border-stroke bg-[#0F0F0F] p-5 sm:w-[360px] sm:max-w-none sm:p-6">
                   <div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-lime font-medium text-bg">{review.name.charAt(0)}</span><span className="font-medium text-ink">{review.name}</span></div>
                   <p className="mt-5 tracking-[0.14em] text-lime">{'★'.repeat(review.stars)}</p>
                   <p className="mt-4 text-sm leading-relaxed text-inkdim">{review.text}</p>
@@ -53,6 +48,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
               ))}
             </div>
           </div>
+          <ReviewForm productSlug={product.slug} />
         </section>
 
         <section className="mx-auto max-w-[92rem] px-6 py-16 sm:py-20 lg:px-10 lg:py-24">

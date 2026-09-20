@@ -52,6 +52,20 @@ export default function ProductPurchasePanel({ product }: ProductPurchasePanelPr
     setIsAdded(true);
   };
 
+  const buyNow = () => {
+    const item: CartItem = {
+      slug: product.slug,
+      name: product.name,
+      price: product.price,
+      image: product.images[0],
+      color: selectedColor,
+      size: selectedSize,
+      quantity,
+    };
+    window.localStorage.setItem('xlit-buy-now', JSON.stringify([item]));
+    window.location.assign('/checkout?source=buy-now');
+  };
+
   return (
     <>
       <div className="mt-8 border-y border-stroke py-7">
@@ -104,7 +118,7 @@ export default function ProductPurchasePanel({ product }: ProductPurchasePanelPr
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         <button type="button" onClick={addToCart} className="hero-cta hero-cta--add-to-cart justify-center rounded-lg border border-ink bg-transparent px-6 py-3 text-sm font-medium uppercase tracking-wide text-ink"><span className="text-container"><span className="text">{isAdded ? 'Added to cart' : 'Add to cart'}</span></span></button>
-        <a href="/customize" className="hero-cta justify-center rounded-lg bg-lime px-6 py-3 text-sm font-medium uppercase tracking-wide text-bg"><span className="text-container"><span className="text">Buy it now</span></span></a>
+        <button type="button" onClick={buyNow} className="hero-cta justify-center rounded-lg bg-lime px-6 py-3 text-sm font-medium uppercase tracking-wide text-bg"><span className="text-container"><span className="text">Buy it now</span></span></button>
       </div>
       {isAdded && <p className="mt-3 text-sm text-lime" role="status">Added {quantity} × {product.name} ({selectedColor}, {selectedSize}) to cart. <a href="/cart" className="underline underline-offset-4">View cart</a></p>}
 

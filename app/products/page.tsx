@@ -1,8 +1,9 @@
 import ProductCard from '../../components/ProductCard';
 import Footer from '../../components/Footer';
 import Nav from '../../components/Nav';
-import { products } from '../../data/products';
-export default function ProductsPage() {
+import { getProducts } from '../../lib/catalog';
+export default async function ProductsPage() {
+  const products = await getProducts();
   return (
     <>
       <Nav />

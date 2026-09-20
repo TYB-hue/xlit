@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { productImageSrc } from '../lib/product-image';
 
 type CartItem = {
   slug: string;
@@ -84,7 +85,7 @@ export default function CartPageContent() {
           {cart.map((item, index) => (
             <article key={`${item.slug}-${item.color}-${item.size}`} className="grid grid-cols-[112px_minmax(0,1fr)] gap-4 py-5 sm:grid-cols-[150px_minmax(0,1fr)] sm:gap-6 sm:py-6">
               <div className="flex aspect-square items-center justify-center overflow-hidden rounded-lg bg-card p-2">
-                <img src={`/products/${item.image}`} alt={`XLIT ${item.name}`} className="h-full w-full object-contain" />
+                <img src={productImageSrc(item.image)} alt={`XLIT ${item.name}`} className="h-full w-full object-contain" />
               </div>
               <div className="flex min-w-0 flex-col sm:py-1">
                 <div className="flex items-start justify-between gap-3">
@@ -120,7 +121,7 @@ export default function CartPageContent() {
             <span className="font-medium text-ink">Total</span>
             <span className="text-xl font-medium text-ink">{formatPrice(subtotal)}</span>
           </div>
-          <button type="button" disabled className="mt-7 w-full cursor-not-allowed rounded-lg bg-lime px-5 py-3 text-sm font-medium uppercase tracking-wide text-bg opacity-60">Checkout coming soon</button>
+          <a href="/checkout?source=cart" className="mt-7 block w-full rounded-lg bg-lime px-5 py-3 text-center text-sm font-medium uppercase tracking-wide text-bg">Checkout</a>
           <a href="/products" className="mt-5 block text-center text-sm text-inkdim underline underline-offset-4 transition-colors hover:text-lime">Continue shopping</a>
         </aside>
       </div>
