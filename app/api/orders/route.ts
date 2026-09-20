@@ -91,6 +91,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Please complete the order details correctly.' }, { status: 400 });
     }
 
+    if ((method === 'instapay' && !process.env.NEXT_PUBLIC_INSTAPAY_ACCOUNT)
+      || (method === 'vodafone_cash' && !process.env.NEXT_PUBLIC_VODAFONE_CASH_NUMBER)) {
+      return NextResponse.json({ error: 'This payment method is not available at the moment.' }, { status: 400 });
+    }
+
     if (isTransfer && (!(proof instanceof File) || proof.size === 0)) {
       return NextResponse.json({ error: 'Upload a screenshot proving the transfer before submitting your order.' }, { status: 400 });
     }
