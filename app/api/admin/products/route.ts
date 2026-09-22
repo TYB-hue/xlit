@@ -17,7 +17,7 @@ export async function GET(request: Request) {
 
   const { data, error } = await supabase
     .from('products')
-    .select('id, slug, name, price_egp, collection, stock_message, rating, review_count, display_order, is_active, product_images(image_path, display_order), product_colors(name, display_order), product_sizes(name, display_order), product_details(title, content, display_order)')
+    .select('id, slug, name, price_egp, collection, stock_message, stock_quantity, rating, review_count, display_order, is_active, product_images(image_path, display_order), product_colors(name, display_order), product_sizes(name, display_order), product_details(title, content, display_order)')
     .order('display_order');
 
   if (error) return NextResponse.json({ error: 'Unable to load products.' }, { status: 500 });
@@ -36,6 +36,7 @@ export async function POST(request: Request) {
   const name = typeof input.name === 'string' ? input.name.trim() : '';
   const collection = typeof input.collection === 'string' ? input.collection.trim() : '';
   const stockMessage = typeof input.stockMessage === 'string' ? input.stockMessage.trim() : '';
+  const stockQuantity = Number(input.stockQuantity);
   const priceEgp = Number(input.priceEgp);
   const displayOrder = Number(input.displayOrder);
   const images = strings(input.images, 8);
@@ -49,7 +50,8 @@ export async function POST(request: Request) {
   );
 
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || !name || !collection || !stockMessage
-    || !Number.isInteger(priceEgp) || priceEgp < 0 || !Number.isInteger(displayOrder) || displayOrder < 1
+    || !Number.isInteger(priceEgp) || priceEgp < 0 || !Number.isInteger(stockQuantity) || stockQuantity < 0
+    || !Number.isInteger(displayOrder) || displayOrder < 1
     || !images || !colors || !sizes || !validDetails) {
     return NextResponse.json({ error: 'Complete every product field using the XLIT product structure.' }, { status: 400 });
   }
@@ -71,7 +73,7 @@ export async function POST(request: Request) {
 
   const { data: product, error: productError } = await supabase
     .from('products')
-    .insert({ slug, name, price_egp: priceEgp, collection, stock_message: stockMessage, display_order: displayOrder, rating: 0, review_count: 0 })
+    .insert({ slug, name, price_egp: priceEgp, collection, stock_message: stockMessage, stock_quantity: stockQuantity, display_order: displayOrder, rating: 0, review_count: 0 })
     .select('id')
     .single();
 

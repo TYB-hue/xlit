@@ -8,6 +8,7 @@ type CatalogRow = {
   price_egp: number;
   collection: string;
   stock_message: string;
+  stock_quantity: number;
   rating: number;
   review_count: number;
   display_order: number;
@@ -63,7 +64,7 @@ export async function getProducts(): Promise<Product[]> {
 
   const { data, error } = await client
     .from('products')
-    .select('slug, name, price_egp, collection, stock_message, rating, review_count, display_order, product_images(image_path, display_order), product_colors(name, display_order), product_sizes(name, display_order), product_details(title, content, display_order), product_reviews(reviewer_name, content, stars, created_at)')
+    .select('slug, name, price_egp, collection, stock_message, stock_quantity, rating, review_count, display_order, product_images(image_path, display_order), product_colors(name, display_order), product_sizes(name, display_order), product_details(title, content, display_order), product_reviews(reviewer_name, content, stars, created_at)')
     .eq('is_active', true)
     .order('display_order');
 

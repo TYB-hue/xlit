@@ -38,3 +38,27 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
   return NextResponse.json({ message: 'Product deleted.' });
 }
+
+export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+  const supabase = await requireAdmin(request);
+  if (!supabase) return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
+
+  const body: unknown = await request.json().catch(() => null);
+  const stockQuantity = Number((body as { stockQuantity?: unknown } | null)?.stockQuantity);
+
+  if (!Number.isInteger(stockQuantity) || stockQuantity < 0) {
+    return NextResponse.json({ error: 'Stock quantity must be a whole number of zero or more.' }, { status: 400 });
+  }
+
+  const { data, error } = await supabase
+    .from('products')
+    .update({ stock_quantity: stockQuantity, updated_at: new Date().toISOString() })
+    .eq('id', params.id)
+    .select('id, stock_quantity')
+    .maybeSingle();
+
+  if (error) return NextResponse.json({ error: 'Unable to update stock.' }, { status: 500 });
+  if (!data) return NextResponse.json({ error: 'Product not found.' }, { status: 404 });
+
+  return NextResponse.json({ product: data, message: 'Stock updated.' });
+}
