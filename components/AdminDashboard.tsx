@@ -77,7 +77,15 @@ export default function AdminDashboard() {
   async function loadProducts() {
     if (!accessToken) return;
     const response = await fetch('/api/admin/products', { headers: { Authorization: `Bearer ${accessToken}` } });
-    if (!response.ok) { setNotice('This account is not authorised as the XLIT admin.'); return; }
+    if (!response.ok) {
+      if (response.status === 401) {
+        await supabaseBrowser?.auth.signOut();
+        setNotice('Your admin session has expired. Sign in again using an approved XLIT admin email.');
+      } else {
+        setNotice('Unable to load the XLIT admin catalog. Please try again.');
+      }
+      return;
+    }
     const data = await response.json();
     setProducts(data.products ?? []);
   }
