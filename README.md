@@ -1,4 +1,4 @@
-# Lumen — landing page clone
+#
 
 Next.js 14 (App Router) + Tailwind CSS.
 
